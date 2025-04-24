@@ -1,0 +1,36 @@
+{
+  "name": "kam-mcp-server",
+  "version": "0.0.1",
+  "description": "kam-mcp-server MCP server",
+  "type": "module",
+  "bin": {
+    "kam-mcp-server": "./dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Bamo-alt/kam-mcp-server.git"
+  },
+  "scripts": {
+    "clear": "rm -rf dist/*",
+    "build": "npm run clear && tsc && mcp-build && node -e \"require('fs').chmodSync('dist/index.js', '755')\"",
+    "watch": "tsc --watch",
+    "start": "node dist/index.js",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "mcp-framework": "^0.2.2",
+    "uuid": "^11.1.0",
+    "ws": "^8.18.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.24",
+    "@types/ws": "^8.18.1",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18.19.0"
+  }
+}
