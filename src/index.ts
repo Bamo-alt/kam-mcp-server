@@ -13,7 +13,7 @@ try {
 
 const server = new FastMCP({
   name: "kam-mcp-server",
-  version: "0.0.1",
+  version: "0.0.2",
 });
 
 registerResources(server);
