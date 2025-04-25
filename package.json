@@ -1,6 +1,6 @@
 {
   "name": "kam-mcp-server",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "keywords": [
     "mcp",
     "server",
@@ -33,9 +33,9 @@
     "ws": "^8.18.1"
   },
   "devDependencies": {
-    "@types/node": "^20.11.24",
+    "@types/node": "^20.17.31",
     "@types/ws": "^8.18.1",
-    "typescript": "^5.3.3"
+    "typescript": "^5.8.3"
   },
   "engines": {
     "node": ">=20.18.0"
