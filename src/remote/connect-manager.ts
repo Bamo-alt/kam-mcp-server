@@ -10,7 +10,7 @@ export class ConnectionManager extends EventEmitter {
   private connection: KamRemoteConnection | null = null;
   private state: ConnectionState = "stopped";
   private polyhavenEnabled: boolean = false;
-  private port: number;
+  public readonly port: number;
 
   constructor() {
     super();
@@ -25,7 +25,6 @@ export class ConnectionManager extends EventEmitter {
   // 初始化 WebSocket 服务器
   public async initialize(): Promise<void> {
     if (this.state === "running" || this.state === "starting") {
-      console.info("WebSocket server already running or starting");
       return;
     }
 
@@ -49,14 +48,10 @@ export class ConnectionManager extends EventEmitter {
       await this.connection.start();
 
       this.state = "running";
-      console.info(`Kam MCP WebSocket server running on port ${this.port}`);
-    } catch (error) {
-      console.error(
-        `Failed to start WebSocket server: ${
-          error instanceof Error ? error.message : String(error)
-        }`
-      );
+    } catch (error: any) {
       this.state = "error";
+      error.message = "Failed to start WebSocket server" + error?.message;
+      throw error;
     }
 
     this.emit("stateChange", this.state);
@@ -91,7 +86,6 @@ export class ConnectionManager extends EventEmitter {
 
     this.state = "stopped";
     this.emit("stateChange", this.state);
-    console.info("KamMCP WebSocket server shut down");
   }
 
   // 发送命令到 Kam
@@ -115,11 +109,6 @@ export class ConnectionManager extends EventEmitter {
       const result = await this.connection!.sendCommand(commandType, params);
       return result;
     } catch (error) {
-      console.error(
-        `Command error: ${
-          error instanceof Error ? error.message : String(error)
-        }`
-      );
       throw error;
     }
   }

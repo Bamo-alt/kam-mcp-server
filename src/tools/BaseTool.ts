@@ -12,16 +12,10 @@ export abstract class BaseRemoteTool<
   abstract inputSchema: ZodTypeAny;
 
   protected beforeExecute(params: Params): Promise<void> {
-    console.info(
-      `Executing tool: ${this.name} with params: ${JSON.stringify(params)}`
-    );
     return Promise.resolve();
   }
 
   protected afterExecute(result: unknown): Promise<void> {
-    console.info(
-      `Tool: ${this.name} executed result: ${JSON.stringify(result)}`
-    );
     return Promise.resolve();
   }
 
@@ -42,9 +36,8 @@ export abstract class BaseRemoteTool<
         content: [
           {
             type: "text",
-            text: `Create point-based element failed: ${
-              error instanceof Error ? error.message : String(error)
-            }`,
+            text: `Create point-based element failed: ${error instanceof Error ? error.message : String(error)
+              }`,
           },
         ],
       };

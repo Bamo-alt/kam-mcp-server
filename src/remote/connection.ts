@@ -77,9 +77,6 @@ export class KamRemoteConnection extends EventEmitter {
   public start(): Promise<void> {
     return new Promise<void>((resolve) => {
       this.server.on("listening", () => {
-        console.info(
-          `KamConnection WebSocket server listening on port ${this.port}`
-        );
         this.startPingTimer();
         resolve();
       });
@@ -117,10 +114,8 @@ export class KamRemoteConnection extends EventEmitter {
       // 关闭服务器
       this.server.close((err) => {
         if (err) {
-          console.error(`Error closing WebSocket server: ${err.message}`);
           reject(err);
         } else {
-          console.info("KamRemoteConnection WebSocket server closed");
           resolve();
         }
       });
@@ -170,15 +165,9 @@ export class KamRemoteConnection extends EventEmitter {
 
       // 发送命令
       client.send(JSON.stringify(command), (err) => {
-        if (err) {
-          clearTimeout(timeout);
-          this.pendingCommands.delete(commandId);
-          reject(new Error(`Failed to send command: ${err.message}`));
-        } else {
-          console.info(
-            `Sent command ${commandType} (ID: ${commandId}) to Kam client`
-          );
-        }
+        clearTimeout(timeout);
+        this.pendingCommands.delete(commandId);
+        reject(new Error(`Failed to send command: ${err?.message}`));
       });
     });
   }
@@ -200,9 +189,6 @@ export class KamRemoteConnection extends EventEmitter {
       "connection",
       (socket: WebSocket, request: { socket: { remoteAddress: any } }) => {
         const clientId = uuidv4();
-        console.info(
-          `New Kam client connected (ID: ${clientId}), IP: ${request.socket.remoteAddress}`
-        );
 
         // 存储客户端信息
         this.clients.set(socket, {
@@ -243,41 +229,40 @@ export class KamRemoteConnection extends EventEmitter {
             }
             // 处理心跳
             else if (message.type === "pong") {
-              console.info(`Received pong from client ${clientId}`);
+              // console.info(`Received pong from client ${clientId}`);
             }
             // 处理其他消息类型
             else {
-              console.info(
-                `Received message from client ${clientId}: ${JSON.stringify(
-                  message
-                )}`
-              );
+              // console.info(
+              //   `Received message from client ${clientId}: ${JSON.stringify(
+              //     message
+              //   )}`
+              // );
             }
           } catch (error) {
-            console.error(`Error processing message: ${error}`);
+            throw new Error(`Error processing message: ${error}`);
           }
         });
 
         // 处理关闭
         socket.on("close", (code, reason) => {
-          console.info(
-            `Client ${clientId} disconnected (Code: ${code}, Reason: ${reason})`
-          );
+          // console.info(
+          //   `Client ${clientId} disconnected (Code: ${code}, Reason: ${reason})`
+          // );
           this.clients.delete(socket);
           this.emit("clientDisconnected", clientId);
         });
 
         // 处理错误
         socket.on("error", (error: any) => {
-          console.error(`WebSocket error for client ${clientId}: ${error}`);
+          throw new Error(`WebSocket error for client ${clientId}: ${error}`);
         });
       }
     );
 
     // 处理服务器错误
     this.server.on("error", (error: any) => {
-      console.error(`WebSocket server error: ${error}`);
-      this.emit("error", error);
+      throw new Error(`WebSocket server error: ${error}`);
     });
   }
 
@@ -302,7 +287,7 @@ export class KamRemoteConnection extends EventEmitter {
         );
       }
     } else {
-      console.warn(`Received response for unknown command ID: ${response.id}`);
+      throw new Error(`Received response for unknown command ID: ${response.id}`);
     }
   }
 
@@ -344,7 +329,6 @@ export class KamRemoteConnection extends EventEmitter {
     // 检查和移除超时的客户端
     for (const [client, info] of this.clients.entries()) {
       if (info.lastActivity < timeoutThreshold) {
-        console.warn(`Client ${info.id} timed out, closing connection`);
         client.close(1000, "Connection timed out");
         this.clients.delete(client);
         this.emit("clientDisconnected", info.id);
@@ -355,7 +339,7 @@ export class KamRemoteConnection extends EventEmitter {
       try {
         client.send(JSON.stringify({ type: "ping", timestamp: now }));
       } catch (error) {
-        console.error(`Error sending ping to client ${info.id}: ${error}`);
+        throw new Error(`Error sending ping to client ${info.id}: ${error}`);
       }
     }
   }

@@ -48,17 +48,11 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 });
 
 async function startWebSocketServer() {
-  try {
-    await connectionManager.initialize();
-    console.info("connectionManager.initialize success");
-  } catch (e) {
-    console.error("connectionManager.initialize error", e);
-  }
+  await connectionManager.initialize();
 }
 
 // 优雅关闭函数
 async function gracefulShutdown(returnCode: number = 0) {
-  console.info("正在关闭服务器...");
   await connectionManager.shutdown();
   await server.close();
   process.exit(returnCode);
@@ -68,23 +62,25 @@ async function main() {
   await startWebSocketServer();
 
   // 处理进程信号，确保优雅关闭
-  process.on("SIGINT", gracefulShutdown);
-  process.on("SIGTERM", gracefulShutdown);
-  process.on("SIGHUP", gracefulShutdown);
   const transport = new StdioServerTransport();
   await server.connect(transport);
 
   server.onclose = () => {
-    console.info("Server closed");
-    process.exit(0);
+    gracefulShutdown(0);
   };
+
   server.onerror = (error) => {
-    console.error("Server error:", error);
-    process.exit(1);
+    gracefulShutdown(1)
   };
+
+  console.info(
+    JSON.stringify({
+      type: "text",
+      text: `kam-mcp-server started, port: ${connectionManager.port}`,
+    })
+  );
 }
 
 main().catch((error) => {
-  console.error("Fatal error in main():", error);
-  process.exit(1);
+  gracefulShutdown(1)
 });

@@ -7,13 +7,13 @@ export function getPort() {
   const portArg =
     process.argv.find((arg) => arg.startsWith("--port="))?.split("=")[1] ??
     process.argv[process.argv.indexOf("--port") + 1];
+
   if (portArg === undefined) {
-    console.warn("No port provided, using default port 8765");
     return DEFAULT_PORT;
   }
+
   const port = parseInt(portArg);
   if (isNaN(port)) {
-    console.error("Invalid port provided, using default port 8765");
     return DEFAULT_PORT;
   }
   return port;
